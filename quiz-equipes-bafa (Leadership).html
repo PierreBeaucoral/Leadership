@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz – États d’esprit – Construire des équipes équilibrées (BAFA)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#121a2b;
+      --muted:#9fb0d0;
+      --text:#e9efff;
+      --accent:#7dd3fc;
+      --ok:#86efac;
+      --warn:#fda4af;
+      --line:rgba(255,255,255,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 15% 10%, rgba(125,211,252,.18), transparent 55%),
+                  radial-gradient(900px 500px at 90% 35%, rgba(134,239,172,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.35;
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    header{margin:8px 0 18px}
+    h1{font-size:1.35rem;margin:0 0 6px}
+    p{margin:6px 0;color:var(--muted)}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent 60%), var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+    .toprow{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .badge{
+      font-size:.82rem;
+      color:var(--muted);
+      border:1px solid var(--line);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .progress{
+      height:10px;border-radius:999px;background:rgba(255,255,255,.08);
+      overflow:hidden;border:1px solid var(--line);
+      margin:10px 0 14px;
+    }
+    .bar{height:100%;width:0;background: linear-gradient(90deg, var(--accent), rgba(134,239,172,.9));}
+
+    .q{font-size:1.15rem;margin:10px 0 8px;}
+    .sub{font-size:.92rem;color:var(--muted);margin:0 0 14px;}
+
+    .scale{display:grid;grid-template-columns: repeat(5, 1fr);gap:10px;margin:10px 0 14px;}
+    .opt{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius:14px;
+      padding:10px;
+      cursor:pointer;
+      transition:.15s transform, .15s background;
+      text-align:center;
+      user-select:none;
+    }
+    .opt:hover{transform: translateY(-1px); background: rgba(255,255,255,.06);}
+    .opt.selected{outline:2px solid rgba(125,211,252,.85); background: rgba(125,211,252,.10);}
+
+    .labels{display:flex;justify-content:space-between;color:var(--muted);font-size:.86rem;margin-top:6px}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition:.15s background, .15s transform;
+      font-weight:600;
+    }
+    button:hover{background: rgba(255,255,255,.08); transform: translateY(-1px);}
+    button.primary{background: rgba(125,211,252,.14); border-color: rgba(125,211,252,.35);}
+    button.primary:hover{background: rgba(125,211,252,.20);}
+    button.danger{background: rgba(253,164,175,.10); border-color: rgba(253,164,175,.35);}
+    button.danger:hover{background: rgba(253,164,175,.14);}
+    button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .hidden{display:none !important;}
+
+    /* Results */
+    .gridRes{display:grid;grid-template-columns: 1fr 1fr; gap:16px;}
+    @media (max-width: 900px){ .gridRes{grid-template-columns:1fr} }
+    h2{font-size:1.1rem;margin:0 0 10px}
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      margin:4px 6px 0 0;
+      font-size:.86rem;
+    }
+    .pill.good{border-color: rgba(134,239,172,.35); color: rgba(134,239,172,.95);}
+    .pill.need{border-color: rgba(253,164,175,.35); color: rgba(253,164,175,.95);}
+    .small{font-size:.92rem;color:var(--muted)}
+    .list{margin:8px 0 0 18px;color:var(--muted)}
+    .code{
+      display:inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      background: rgba(0,0,0,.25);
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      color: #cfe7ff;
+      margin-top:6px;
+      word-break:break-all;
+    }
+    canvas{width:100%;max-width:520px;height:auto;border-radius:16px;border:1px solid var(--line);background: rgba(255,255,255,.02)}
+    .footerNote{margin-top:12px;color:var(--muted);font-size:.85rem}
+    details{border-top:1px dashed var(--line); padding-top:10px; margin-top:10px;}
+    summary{cursor:pointer;color:#cfe7ff}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Quiz – États d’esprit pour créer des équipes équilibrées (BAFA)</h1>
+      <p>Objectif : identifier ce que tu <b>apportes naturellement</b> à une équipe et ce dont tu peux avoir <b>besoin</b> (pour composer des équipes complémentaires).</p>
+      <p class="small">Échelle 1→5 : 1 = jamais / pas du tout, 5 = très souvent / totalement. Il n’y a pas de “bon” score : toutes les combinaisons sont utiles en équipe.</p>
+    </header>
+
+    <!-- Quiz -->
+    <div class="card" id="quizCard">
+      <div class="toprow">
+        <div class="badge" id="stepBadge">Question 1/24</div>
+        <div class="badge" id="timeBadge">Temps : ~8–10 min</div>
+        <div class="badge" id="orderBadge">Ordre mélangé</div>
+      </div>
+
+      <div class="progress" aria-label="progression">
+        <div class="bar" id="progressBar"></div>
+      </div>
+
+      <div class="q" id="questionText">…</div>
+      <div class="sub" id="questionHint">Réponds selon ce que tu fais le plus souvent (pas selon ton intention).</div>
+
+      <div class="scale" id="scale"></div>
+      <div class="labels">
+        <span>1 = jamais / pas du tout</span>
+        <span>5 = très souvent / totalement</span>
+      </div>
+
+      <div class="actions">
+        <button id="prevBtn">← Précédent</button>
+        <button class="primary" id="nextBtn">Suivant →</button>
+        <button class="danger" id="resetBtn">Réinitialiser</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card hidden" id="resultsCard">
+      <div class="toprow">
+        <div class="badge">Résultats (affichés uniquement à la fin)</div>
+        <button id="restartBtn">Refaire le quiz</button>
+      </div>
+
+      <div class="gridRes">
+        <div>
+          <h2>Graphique “araignée”</h2>
+          <p class="small">Plus c’est haut, plus c’est un état d’esprit que tu actives facilement. Les scores sont normalisés (0–100).</p>
+          <canvas id="radar" width="520" height="520"></canvas>
+
+          <div class="hr"></div>
+
+          <h2>Ton “code profil” (pour former des équipes)</h2>
+          <p class="small">À partager au formateur / groupe (sans tes réponses détaillées).</p>
+          <div class="code" id="profileCode">…</div>
+
+          <div class="actions" style="margin-top:12px">
+            <button id="exportBtn">Exporter (JSON)</button>
+            <button id="copyBtn">Copier code profil</button>
+          </div>
+
+          <details>
+            <summary>Pourquoi certaines questions sont inversées ?</summary>
+            <p class="small">
+              Pour réduire 2 biais fréquents : (1) répondre “d’accord” à tout ; (2) chercher la réponse socialement souhaitable.
+              Ici, on vise des comportements observables et on mélange des formulations positives/négatives.
+            </p>
+          </details>
+        </div>
+
+        <div>
+          <h2>Ce que tu apportes / ce dont tu peux avoir besoin</h2>
+          <div id="contrib"></div>
+
+          <div class="hr"></div>
+
+          <h2>Profils compatibles (complémentarités)</h2>
+          <p class="small">Suggestions pour équilibrer une équipe (à adapter au contexte et aux rôles).</p>
+          <div id="compat"></div>
+
+          <div class="hr"></div>
+
+          <h2>Règles simples pour composer des équipes</h2>
+          <ul class="list">
+            <li>Vise <b>au moins 1 personne “forte”</b> sur : collaboration, contextualisation, conduite du changement.</li>
+            <li>Évite les équipes où tout le monde a les <b>mêmes 2 forces</b> (risque d’angles morts).</li>
+            <li>En équipe : attribue 1 “rôle” par séance (ex : <i>gardien du cadre</i>, <i>veilleur du groupe</i>, <i>créatif</i>, <i>vérificateur</i>).</li>
+          </ul>
+
+          <details>
+            <summary>Transparence : comment les scores sont calculés ?</summary>
+            <p class="small">
+              Chaque état d’esprit a 4 items. Réponses 1→5. Les items inversés sont rescorrés (score = 6 − réponse).
+              On calcule la moyenne par état d’esprit puis on la convertit en 0–100.
+            </p>
+          </details>
+        </div>
+      </div>
+
+      <div class="footerNote">
+        Confidentialité : ce fichier ne “téléphone” nulle part. Tout se calcule dans ton navigateur.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------------
+    // 1) États d’esprit
+    // ----------------------------
+    const M = {
+      REFLEXION: "Réflexion",
+      COLLAB: "Collaboration",
+      CONTEXTE: "Contextualisation",
+      CRITCREA: "Esprit critique & créatif",
+      EGALITE: "Égalité (au sens large)",
+      CHANGEMENT: "Conduite du changement"
+    };
+
+    // ----------------------------
+    // 2) Questions (24 = 4 par état d’esprit)
+    //    - reformulées en affirmations Likert 1→5
+    //    - mix d’items directs et inversés (rev:true)
+    //    - formulations “comportementales” (moins moralisantes)
+    // ----------------------------
+    const bank = [
+      // Réflexion
+      {m:"REFLEXION", t:"Après une activité/journée, je prends un moment pour repérer ce qui a bien marché.", rev:false},
+      {m:"REFLEXION", t:"Je peux expliquer ce que j’ai appris d’une situation (même si elle était banale).", rev:false},
+      {m:"REFLEXION", t:"Je transforme une difficulté vécue en piste d’amélioration concrète pour la prochaine fois.", rev:false},
+      {m:"REFLEXION", t:"Je passe rarement du temps à revenir sur mes actions (je “passe à autre chose”).", rev:true},
+
+      // Collaboration
+      {m:"COLLAB", t:"Je crée des conditions où chacun peut s’exprimer (tour de parole, écoute, respect).", rev:false},
+      {m:"COLLAB", t:"Je repère des signaux chez les autres (fatigue, gêne, enthousiasme) avant de décider.", rev:false},
+      {m:"COLLAB", t:"Je délègue et je responsabilise plutôt que de tout faire moi-même.", rev:false},
+      {m:"COLLAB", t:"Quand ça va vite, je coupe facilement la parole ou je tranche sans écouter.", rev:true},
+
+      // Contextualisation
+      {m:"CONTEXTE", t:"J’adapte mon comportement au cadre et au public sans perdre mes repères.", rev:false},
+      {m:"CONTEXTE", t:"Je relie ce qui se passe autour (contexte local/actualité) au bien-être du groupe.", rev:false},
+      {m:"CONTEXTE", t:"Je pose des questions pour comprendre le contexte des autres plutôt que de supposer.", rev:false},
+      {m:"CONTEXTE", t:"Je prends mes décisions sans vraiment tenir compte du contexte (contraintes, personnes).", rev:true},
+
+      // Critique & créatif
+      {m:"CRITCREA", t:"Je propose des alternatives créatives quand une activité ou un plan coince.", rev:false},
+      {m:"CRITCREA", t:"Avant de conclure, je clarifie la situation en posant 1–2 questions utiles.", rev:false},
+      {m:"CRITCREA", t:"Je recoupe une information importante avant de la transmettre au groupe.", rev:false},
+      {m:"CRITCREA", t:"Je prends les informations telles qu’elles viennent, sans trop les questionner.", rev:true},
+
+      // Égalité (large)
+      {m:"EGALITE", t:"Je remarque des stéréotypes/préjugés (genre, origine, handicap, etc.) lorsqu’ils apparaissent.", rev:false},
+      {m:"EGALITE", t:"Je fais attention à la place de chacun (parole, responsabilités, accès aux activités).", rev:false},
+      {m:"EGALITE", t:"Je questionne mes propres réflexes (biais/habitudes) qui pourraient exclure quelqu’un.", rev:false},
+      {m:"EGALITE", t:"Je me dis souvent que “tout le monde est traité pareil”, donc je ne me pose pas trop la question.", rev:true},
+
+      // Conduite du changement
+      {m:"CHANGEMENT", t:"Je réfléchis aux conséquences à long terme de mes choix (sur le groupe/collectif/environnement).", rev:false},
+      {m:"CHANGEMENT", t:"Dans une situation difficile, j’identifie ce qui devrait changer (pas seulement ce qui ne va pas).", rev:false},
+      {m:"CHANGEMENT", t:"Je cherche des actions réalistes et durables plutôt qu’une solution rapide.", rev:false},
+      {m:"CHANGEMENT", t:"Je privilégie souvent l’urgence du moment, même si l’impact long terme est flou.", rev:true},
+    ];
+
+    // ----------------------------
+    // 3) Mélange (ordre différent à chaque chargement)
+    // ----------------------------
+    function mulberry32(a){
+      return function(){
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+    }
+    const seed = (Date.now() ^ (Math.random()*1e9)) >>> 0;
+    const rnd = mulberry32(seed);
+
+    const order = bank.map((_,i)=>i);
+    for(let i=order.length-1;i>0;i--){
+      const j = Math.floor(rnd()*(i+1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+
+    // answers aligned with bank indices; null until answered
+    const answers = Array(bank.length).fill(null); // raw 1..5
+
+    // ----------------------------
+    // 4) UI bindings
+    // ----------------------------
+    let pos = 0; // position in "order"
+    const elQ = document.getElementById("questionText");
+    const elStep = document.getElementById("stepBadge");
+    const elScale = document.getElementById("scale");
+    const elProg = document.getElementById("progressBar");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const quizCard = document.getElementById("quizCard");
+    const resultsCard = document.getElementById("resultsCard");
+
+    const exportBtn = document.getElementById("exportBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    const scaleLabels = [
+      {v:1, l:"1"},
+      {v:2, l:"2"},
+      {v:3, l:"3"},
+      {v:4, l:"4"},
+      {v:5, l:"5"},
+    ];
+
+    function currentIndex(){
+      return order[pos];
+    }
+
+    function answeredCount(){
+      return answers.filter(a=>a!=null).length;
+    }
+
+    function renderScale(selected){
+      elScale.innerHTML = "";
+      scaleLabels.forEach(s=>{
+        const d = document.createElement("div");
+        d.className = "opt" + (selected===s.v ? " selected" : "");
+        d.textContent = s.l;
+        d.title = ["Jamais","Rarement","Parfois","Souvent","Très souvent"][s.v-1];
+        d.addEventListener("click", ()=>{
+          answers[currentIndex()] = s.v;
+          render();
+        });
+        elScale.appendChild(d);
+      });
+    }
+
+    function render(){
+      const total = order.length;
+      elStep.textContent = `Question ${pos+1}/${total}`;
+      const q = bank[currentIndex()];
+      elQ.textContent = q.t;
+
+      // Progress: % answered
+      const p = Math.round((answeredCount()/total)*100);
+      elProg.style.width = p + "%";
+
+      renderScale(answers[currentIndex()]);
+      prevBtn.disabled = (pos===0);
+      nextBtn.textContent = (pos===total-1) ? "Voir mes résultats" : "Suivant →";
+      nextBtn.disabled = (answers[currentIndex()] == null);
+    }
+
+    // ----------------------------
+    // 5) Scoring
+    // ----------------------------
+    function rescored(i){
+      const a = answers[i];
+      if(a==null) return null;
+      const q = bank[i];
+      return q.rev ? (6 - a) : a; // reverse items
+    }
+
+    function computeAverages(){
+      const sums = {REFLEXION:0, COLLAB:0, CONTEXTE:0, CRITCREA:0, EGALITE:0, CHANGEMENT:0};
+      const cnt  = {REFLEXION:0, COLLAB:0, CONTEXTE:0, CRITCREA:0, EGALITE:0, CHANGEMENT:0};
+
+      for(let i=0;i<bank.length;i++){
+        const r = rescored(i);
+        if(r!=null){
+          sums[bank[i].m] += r;
+          cnt[bank[i].m]  += 1;
+        }
+      }
+      const avg = {};
+      Object.keys(sums).forEach(k=>{
+        avg[k] = cnt[k] ? (sums[k]/cnt[k]) : null; // 1..5
+      });
+      return {avg, cnt};
+    }
+
+    function pctFromAvg(a){ // 1..5 -> 0..100
+      if(a==null) return 0;
+      return Math.round(((a-1)/4)*100);
+    }
+
+    function sortedMindsets(avg){
+      return Object.keys(avg)
+        .map(k=>({k, name:M[k], v:avg[k], pct:pctFromAvg(avg[k])}))
+        .sort((a,b)=> b.v - a.v);
+    }
+
+    // ----------------------------
+    // 6) Radar chart (canvas)
+    // ----------------------------
+    function drawRadar(scores){ // scores: array of {name,pct}
+      const canvas = document.getElementById("radar");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      const cx = W/2, cy = H/2;
+      const R  = Math.min(W,H)*0.38;
+
+      const labels = scores.map(s=>s.name);
+      const values = scores.map(s=>s.pct/100); // 0..1
+      const n = labels.length;
+
+      // helpers
+      function polar(i, r){
+        const ang = (-Math.PI/2) + (i*(2*Math.PI/n));
+        return [cx + r*Math.cos(ang), cy + r*Math.sin(ang)];
+      }
+
+      // background
+      ctx.fillStyle = "rgba(255,255,255,0.01)";
+      ctx.fillRect(0,0,W,H);
+
+      // grid rings (0.25,0.5,0.75,1.0)
+      const rings = [0.25,0.5,0.75,1.0];
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.lineWidth = 1;
+      rings.forEach(rr=>{
+        ctx.beginPath();
+        for(let i=0;i<n;i++){
+          const [x,y] = polar(i, R*rr);
+          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      });
+
+      // axes
+      for(let i=0;i<n;i++){
+        const [x,y] = polar(i, R);
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.lineTo(x,y);
+        ctx.stroke();
+      }
+
+      // polygon
+      ctx.beginPath();
+      for(let i=0;i<n;i++){
+        const [x,y] = polar(i, R*values[i]);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = "rgba(125,211,252,0.18)";
+      ctx.strokeStyle = "rgba(134,239,172,0.75)";
+      ctx.lineWidth = 2;
+      ctx.fill();
+      ctx.stroke();
+
+      // points
+      for(let i=0;i<n;i++){
+        const [x,y] = polar(i, R*values[i]);
+        ctx.beginPath();
+        ctx.arc(x,y,4,0,2*Math.PI);
+        ctx.fillStyle = "rgba(125,211,252,0.85)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.25)";
+        ctx.stroke();
+      }
+
+      // labels
+      ctx.fillStyle = "rgba(233,239,255,0.92)";
+      ctx.font = "14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      for(let i=0;i<n;i++){
+        const [x,y] = polar(i, R*1.18);
+        // small wrap
+        const txt = labels[i];
+        const maxLen = 18;
+        if(txt.length <= maxLen){
+          ctx.fillText(txt, x, y);
+        } else {
+          const parts = [];
+          let line = "";
+          txt.split(" ").forEach(w=>{
+            if((line + " " + w).trim().length > maxLen){
+              parts.push(line.trim()); line = w;
+            } else line += " " + w;
+          });
+          if(line.trim()) parts.push(line.trim());
+          const dy = 16;
+          parts.slice(0,2).forEach((ln, k)=> ctx.fillText(ln, x, y + (k-0.5)*dy));
+        }
+      }
+
+      // center title
+      ctx.fillStyle = "rgba(159,176,208,0.95)";
+      ctx.font = "13px ui-sans-serif, system-ui";
+      ctx.fillText("0–100", cx, cy);
+    }
+
+    // ----------------------------
+    // 7) Profil & compatibilités
+    // ----------------------------
+    function buildProfile(sorted){
+      const top2 = sorted.slice(0,2);
+      const low2 = sorted.slice(-2).reverse(); // lowest first
+
+      // Code profil stable et simple (ex: COLLAB+CRITCREA / needs CONTEXTE+REFLEXION)
+      const short = {
+        "Réflexion":"RFX",
+        "Collaboration":"COL",
+        "Contextualisation":"CTX",
+        "Esprit critique & créatif":"CRC",
+        "Égalité (au sens large)":"EQL",
+        "Conduite du changement":"CHG"
+      };
+
+      const code = `${short[top2[0].name]}-${short[top2[1].name]}__BESOIN_${short[low2[0].name]}-${short[low2[1].name]}`;
+
+      // “Tu apportes / tu as besoin”
+      const contributions = {
+        REFLEXION: "clarifier ce qui marche / apprentissages, prise de recul",
+        COLLAB: "cohésion, écoute, répartition des rôles",
+        CONTEXTE: "adaptation au public/cadre, lecture des contraintes",
+        CRITCREA: "idées, alternatives, questions utiles, vérification",
+        EGALITE: "attention à la place de chacun, inclusion et équité",
+        CHANGEMENT: "vision long terme, actions durables, cap de transformation"
+      };
+
+      const needs = {
+        REFLEXION: "un temps de recul (retour d’expérience, ajustements)",
+        COLLAB: "un climat d’écoute et un partage des responsabilités",
+        CONTEXTE: "des infos sur le public, les contraintes, le cadre",
+        CRITCREA: "des questions, des options, et une vérification des infos",
+        EGALITE: "un rappel à l’inclusion (qui parle ? qui fait ? qui est exclu ?)",
+        CHANGEMENT: "un cap et une logique long terme (durable/éthique)"
+      };
+
+      // Compatibilité = suggérer profils dont la force est dans tes besoins
+      // + “contrepoids” : si top2 très action, proposer réflexion; si top2 très analyse, proposer changement/collab, etc.
+      const recommend = [];
+      low2.forEach(x=>{
+        recommend.push({
+          title: `Cherche un(e) équipier(e) fort(e) en ${x.name}`,
+          why: `Pour t’aider sur : ${needs[x.k]}`
+        });
+      });
+
+      // Heuristique supplémentaire : si COLLAB faible, recommander aussi EGALITE; si CRITCREA faible, recommander REFLEXION/CONTEXTE, etc.
+      // (simple et lisible)
+      const extras = [];
+      const lowKeys = new Set(low2.map(x=>x.k));
+      if(lowKeys.has("COLLAB") && !lowKeys.has("EGALITE")){
+        extras.push({title:"Bonus complément", why:"Un profil fort en Égalité aide souvent la dynamique de groupe et la répartition de la parole."});
+      }
+      if(lowKeys.has("CRITCREA") && !lowKeys.has("REFLEXION")){
+        extras.push({title:"Bonus complément", why:"Un profil fort en Réflexion facilite la prise de recul et la formulation de meilleures questions."});
+      }
+      if(lowKeys.has("CHANGEMENT") && !lowKeys.has("CONTEXTE")){
+        extras.push({title:"Bonus complément", why:"Un profil fort en Contextualisation aide à poser le cadre et à ancrer les choix dans les contraintes."});
+      }
+
+      return {top2, low2, code, contributions, recommend, extras};
+    }
+
+    function renderResults(){
+      const {avg} = computeAverages();
+      const sorted = sortedMindsets(avg);
+
+      // Radar order fixed (for readability)
+      const fixedOrder = [
+        {k:"REFLEXION", name:M.REFLEXION},
+        {k:"COLLAB", name:M.COLLAB},
+        {k:"CONTEXTE", name:M.CONTEXTE},
+        {k:"CRITCREA", name:M.CRITCREA},
+        {k:"EGALITE", name:M.EGALITE},
+        {k:"CHANGEMENT", name:M.CHANGEMENT},
+      ].map(o=>{
+        const s = sorted.find(x=>x.k===o.k);
+        return {name:o.name, pct:s.pct};
+      });
+
+      drawRadar(fixedOrder);
+
+      const prof = buildProfile(sorted);
+      document.getElementById("profileCode").textContent = prof.code;
+
+      // Contributions
+      const contribEl = document.getElementById("contrib");
+      const topTxt = prof.top2.map(x=>`<span class="pill good">Force : ${x.name} (${x.pct})</span>`).join("");
+      const lowTxt = prof.low2.map(x=>`<span class="pill need">Besoin : ${x.name} (${x.pct})</span>`).join("");
+
+      const bring = prof.top2.map(x=>`<li><b>${x.name}</b> : tu apportes souvent <i>${prof.contributions[x.k]}</i>.</li>`).join("");
+      const need = prof.low2.map(x=>`<li><b>${x.name}</b> : tu peux avoir besoin de <i>${prof.contributions[x.k]}</i> chez un(e) autre.</li>`).join("");
+
+      contribEl.innerHTML = `
+        <div>${topTxt} ${lowTxt}</div>
+        <div class="hr"></div>
+        <p class="small"><b>En équipe, tu apportes :</b></p>
+        <ul class="list">${bring}</ul>
+        <p class="small"><b>En équipe, tu bénéficies de :</b></p>
+        <ul class="list">${need}</ul>
+      `;
+
+      // Compat
+      const compatEl = document.getElementById("compat");
+      const rec = prof.recommend.map(r=>`<li><b>${r.title}</b> — ${r.why}</li>`).join("");
+      const ex  = prof.extras.length ? `<div class="hr"></div><ul class="list">${prof.extras.map(e=>`<li><b>${e.title}</b> — ${e.why}</li>`).join("")}</ul>` : "";
+      compatEl.innerHTML = `<ul class="list">${rec}</ul>${ex}`;
+    }
+
+    // ----------------------------
+    // 8) Navigation
+    // ----------------------------
+    prevBtn.addEventListener("click", ()=>{ if(pos>0){ pos--; render(); }});
+    nextBtn.addEventListener("click", ()=>{
+      if(pos < order.length-1){
+        pos++;
+        render();
+      } else {
+        // finish
+        quizCard.classList.add("hidden");
+        resultsCard.classList.remove("hidden");
+        renderResults();
+        window.scrollTo({top:0, behavior:"smooth"});
+      }
+    });
+
+    resetBtn.addEventListener("click", ()=>{
+      if(!confirm("Réinitialiser toutes tes réponses ?")) return;
+      for(let i=0;i<answers.length;i++) answers[i]=null;
+      pos=0;
+      render();
+    });
+
+    restartBtn.addEventListener("click", ()=>{
+      // simple reload to reshuffle
+      location.reload();
+    });
+
+    // Export + copy
+    exportBtn.addEventListener("click", ()=>{
+      const {avg} = computeAverages();
+      const sorted = sortedMindsets(avg);
+      const prof = buildProfile(sorted);
+      const payload = {
+        created_at: new Date().toISOString(),
+        seed,
+        profile_code: prof.code,
+        scores_avg_1to5: avg,
+        scores_pct_0to100: Object.fromEntries(sorted.map(s=>[s.k, s.pct])),
+        legend: {1:"jamais",2:"rarement",3:"parfois",4:"souvent",5:"très souvent"},
+        note: "Les réponses item-par-item ne sont pas incluses ici par défaut. Duplique ce fichier si tu veux les conserver."
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "resultats-quiz-equipes-bafa.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    copyBtn.addEventListener("click", async ()=>{
+      const txt = document.getElementById("profileCode").textContent;
+      try{
+        await navigator.clipboard.writeText(txt);
+        copyBtn.textContent = "Copié ✅";
+        setTimeout(()=> copyBtn.textContent = "Copier code profil", 1200);
+      } catch(e){
+        alert("Copie impossible sur ce navigateur. Sélectionne le code et copie manuellement.");
+      }
+    });
+
+    // First paint
+    render();
+  </script>
+</body>
+</html>
